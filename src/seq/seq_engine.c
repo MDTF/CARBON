@@ -346,6 +346,7 @@ void seq_engine_run(uint32_t tick_count) {
             // manage notes on this track - check on every tick
             seq_engine_track_manage_notes(track);
 
+// XXX is this right?
             // give a half-step lead-in to start RT recording
             // this is so we can catch notes played a half step early
             // only if we are armed and in the last half of the step time
@@ -369,8 +370,9 @@ void seq_engine_run(uint32_t tick_count) {
                     // this would only be triggered if we start running while
                     // record is already armed
                     if(seq_ctrl_get_record_mode() == SEQ_CTRL_RECORD_ARM) {
-                        sestate.record_pos[track] = tick_count - 
-                            (sestate.step_size[track] >> 1);
+// XXX probably has no effect                    
+//                        sestate.record_pos[track] = tick_count - 
+//                            (sestate.step_size[track] >> 1);
                         // all selected tracks will go into run mode
                         seq_ctrl_set_record_mode(SEQ_CTRL_RECORD_RT);
                     }
@@ -623,6 +625,9 @@ void seq_engine_record_mode_changed(int newval) {
                 }
             }
             gui_grid_set_overlay_enable(0);
+
+            log_debug("idle pos: %d", clock_get_tick_pos());
+            
             break;
         case SEQ_CTRL_RECORD_ARM:
             break;
@@ -644,8 +649,12 @@ void seq_engine_record_mode_changed(int newval) {
                 // only set up selected tracks
                 if(seq_ctrl_get_track_select(track)) {
                     sestate.record_state[track] = SEQ_ENGINE_TRACK_RECORD_RUN;
+// XXX this would be wrong if we are 1/2 step early
                     sestate.record_pos[track] = clock_get_tick_pos();
+
+                    log_debug("t: %d RT pos: %d", track, clock_get_tick_pos());
                 }
+                
                 sestate.record_event_count = 0;  // reset note count
             }            
             break;
