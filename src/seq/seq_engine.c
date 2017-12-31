@@ -317,11 +317,14 @@ void seq_engine_run(uint32_t tick_count) {
         // if we crossed a beat it might be time to change scenes
         if(sestate.beat_cross) {
             sestate.beat_cross = 0;
-            // recording and playback processing of song mode
+            // in songmode: recording and playback processing and change scene on beat cross
             if(sestate.sngmode.enable) {
                 seq_engine_song_mode_process();
+                seq_engine_change_scene_synced();
+            } // not in songmode: change scene on first step of "first selected" track
+            else if(sestate.step_pos[sestate.first_track] == sestate.motion_start[sestate.first_track]) { 
+                seq_engine_change_scene_synced();              
             }
-            seq_engine_change_scene_synced();
         }
         
         // resolve bias track outputs (before step playback on each track)
